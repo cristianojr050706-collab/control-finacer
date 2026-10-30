@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Financial Control - Cristiano Júnior</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#07090e',
+                            card: 'rgba(15, 23, 42, 0.75)',
+                            cyan: '#00f2fe',
+                            purple: '#7928CA',
+                            pink: '#FF0080',
+                            emerald: '#10B981',
+                            rose: '#F43F5E'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #07090e;
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, rgba(121, 40, 202, 0.1) 0px, transparent 50%),
+                radial-gradient(at 50% 90%, rgba(255, 0, 128, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 242, 254, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 242, 254, 0.15);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(11, 15, 25, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 242, 254, 0.4);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen pb-12">
+
+    <!-- ECRÃ DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#07090e]">
+        <div class="glass-card p-8 rounded-3xl max-w-md w-full border border-cyan-500/20 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl"></div>
+
+            <div class="text-center mb-8 relative">
+                <div class="w-16 h-16 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-cyan-500/30">
+                    <i class="fa-solid fa-wallet text-3xl text-white"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight text-white">NEXUS FINANCIAL</h1>
+                <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest font-semibold">Controlo Pessoal Privado</p>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5 relative">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Utilizador</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-4 top-3.5 text-gray-400"></i>
+                        <input type="text" id="username" value="cristiano.junior" required
+                            class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Palavra-passe</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-4 top-3.5 text-gray-400"></i>
+                        <input type="password" id="password" value="123456" required
+                            class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl py-3 pl-11 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3 text-gray-400 hover:text-white">
+                            <i id="password-toggle-icon" class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-gray-500 mt-1">Utilizador: cristiano.junior | Palavra-passe: 123456</p>
+                </div>
+
+                <div id="login-error" class="hidden text-rose-400 text-xs text-center font-medium bg-rose-500/10 py-2 rounded-lg border border-rose-500/20">
+                    Utilizador ou palavra-passe incorretos!
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-cyan-500/25 transition duration-300 transform active:scale-95">
+                    Entrar no Painel <i class="fa-solid fa-arrow-right-long ml-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAINEL PRINCIPAL -->
+    <div id="dashboard" class="hidden min-h-screen">
+        
+        <!-- BARRA DE NAVEGAÇÃO -->
+        <nav class="sticky top-0 z-40 border-b border-slate-800/80 bg-[#07090e]/80 backdrop-blur-xl">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-11 h-11 bg-gradient-to-tr from-cyan-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md shadow-cyan-500/20">
+                            <i class="fa-solid fa-chart-line text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="text-lg font-extrabold tracking-tight text-white block">NEXUS <span class="text-cyan-400">CONTROL</span></span>
+                            <span class="text-[10px] text-gray-400 font-medium tracking-widest block uppercase">Gestão Financeira VIP</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-6">
+                        <div class="hidden md:flex flex-col text-right">
+                            <span id="live-clock" class="text-sm font-bold text-cyan-400 tracking-wider">00:00:00</span>
+                            <span id="live-date" class="text-xs text-gray-400">A carregar data...</span>
+                        </div>
+
+                        <div class="h-8 w-px bg-slate-800 hidden md:block"></div>
+
+                        <div class="flex items-center space-x-3">
+                            <div class="text-right hidden sm:block">
+                                <span class="block text-xs font-bold text-white">Cristiano Júnior</span>
+                                <span class="block text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-circle text-[8px] mr-1"></i>Sessão Ativa</span>
+                            </div>
+                            <button onclick="handleLogout()" title="Sair" class="w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-gray-400 hover:text-rose-400 hover:border-rose-500/40 hover:bg-rose-500/10 transition">
+                                <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- CONTEÚDO -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-8">
+            
+            <!-- CABEÇALHO DE BOAS-VINDAS -->
+            <div class="glass-card p-6 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 border-l-4 border-l-cyan-400">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <span id="greeting-text">Olá</span>, Cristiano! <span class="text-xl">👋</span>
+                    </h2>
+                    <p class="text-sm text-gray-400 mt-1">Controlo centralizado de entradas, saídas, património e investimentos pessoais.</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <button onclick="exportToCSV()" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-gray-200 flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-file-csv text-emerald-400 text-sm"></i> Exportar CSV
+                    </button>
+                    <button onclick="window.print()" class="flex-1 md:flex-none px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-gray-200 flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-print text-cyan-400 text-sm"></i> Imprimir Relatório
+                    </button>
+                    <button onclick="resetAllData()" class="px-3 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold text-rose-400 flex items-center justify-center gap-2 transition" title="Zerar todos os dados">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARTÕES KPI (3D GLASS) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                
+                <div class="glass-card glass-card-hover p-6 rounded-3xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Saldo Atual Atualizado</span>
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                            <i class="fa-solid fa-scale-balanced text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black text-white tracking-tight" id="kpi-balance">R$ 0,00</div>
+                    <div class="mt-2 flex items-center text-xs text-gray-400">
+                        <span class="text-emerald-400 font-semibold mr-1.5"><i class="fa-solid fa-shield-halved"></i> Sincronizado</span>
+                    </div>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Entradas</span>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                            <i class="fa-solid fa-arrow-down-left text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black text-emerald-400 tracking-tight" id="kpi-income">R$ 0,00</div>
+                    <div class="mt-2 flex items-center text-xs text-gray-400">
+                        <span id="kpi-income-count" class="text-gray-300 font-medium">0 lançamentos</span>
+                    </div>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Saídas</span>
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                            <i class="fa-solid fa-arrow-up-right text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black text-rose-400 tracking-tight" id="kpi-expense">R$ 0,00</div>
+                    <div class="mt-2 flex items-center text-xs text-gray-400">
+                        <span id="kpi-expense-count" class="text-gray-300 font-medium">0 lançamentos</span>
+                    </div>
+                </div>
+
+                <div class="glass-card glass-card-hover p-6 rounded-3xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Taxa de Poupança</span>
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                            <i class="fa-solid fa-piggy-bank text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black text-purple-300 tracking-tight" id="kpi-rate">0%</div>
+                    <div class="mt-2 flex items-center text-xs text-gray-400">
+                        <span>Retenção de capital</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- META DE POUPANÇA -->
+            <div class="glass-card p-6 rounded-3xl space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-bullseye text-cyan-400"></i> Meta de Reserva Financeira
+                        </h3>
+                        <p class="text-xs text-gray-400">Acompanhamento do objetivo patrimonial</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400">Meta: R$</span>
+                        <input type="number" id="savings-goal-input" value="50000" onchange="updateGoal()" 
+                            class="w-28 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-cyan-400 font-bold focus:outline-none focus:border-cyan-400">
+                    </div>
+                </div>
+                <div class="w-full bg-slate-800/80 rounded-full h-3 overflow-hidden p-0.5 border border-slate-700/50">
+                    <div id="goal-progress-bar" class="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-[11px] text-gray-400 font-medium">
+                    <span id="goal-current-text">Atual: R$ 0,00</span>
+                    <span id="goal-percentage-text">0% concluído</span>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO & GRÁFICO -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- FORMULÁRIO -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="glass-card p-6 rounded-3xl relative">
+                        <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-800">
+                            <h3 id="form-title" class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-circle-plus text-cyan-400"></i> Novo Lançamento
+                            </h3>
+                            <span id="edit-badge" class="hidden px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold">
+                                EDIÇÃO
+                            </span>
+                        </div>
+
+                        <form id="transaction-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                            <input type="hidden" id="edit-id" value="">
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 uppercase mb-1.5">Tipo</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button type="button" id="btn-type-income" onclick="setType('income')"
+                                        class="py-2.5 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition bg-emerald-500/20 border-emerald-500 text-emerald-400">
+                                        <i class="fa-solid fa-arrow-down-left"></i> Entrada
+                                    </button>
+                                    <button type="button" id="btn-type-expense" onclick="setType('expense')"
+                                        class="py-2.5 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition bg-slate-900 border-slate-800 text-gray-400 hover:border-slate-700">
+                                        <i class="fa-solid fa-arrow-up-right"></i> Saída
+                                    </button>
+                                </div>
+                                <input type="hidden" id="type" value="income">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 uppercase mb-1.5">Descrição / Motivo</label>
+                                <input type="text" id="description" placeholder="Ex: Salário, Contas, Investimento..." required
+                                    class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2.5 px-3.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 uppercase mb-1.5">Valor (R$)</label>
+                                    <input type="number" step="0.01" min="0.01" id="amount" placeholder="0,00" required
+                                        class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2.5 px-3.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 uppercase mb-1.5">Data</label>
+                                    <input type="date" id="date" required
+                                        class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-cyan-400 transition">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 uppercase mb-1.5">Categoria</label>
+                                    <select id="category" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-cyan-400 transition">
+                                        <option value="Rendimento / Salário">Rendimento / Salário</option>
+                                        <option value="Investimentos">Investimentos</option>
+                                        <option value="Habitação / Contas">Habitação / Contas</option>
+                                        <option value="Alimentação">Alimentação</option>
+                                        <option value="Transporte">Transporte</option>
+                                        <option value="Lazer / Pessoal">Lazer / Pessoal</option>
+                                        <option value="Saúde">Saúde</option>
+                                        <option value="Outros">Outros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 uppercase mb-1.5">Estado</label>
+                                    <select id="status" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-cyan-400 transition">
+                                        <option value="pago">Pago / Concluído</option>
+                                        <option value="pendente">Pendente</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 flex gap-3">
+                                <button type="submit" id="btn-submit"
+                                    class="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-cyan-500/20 transition duration-200 text-xs uppercase tracking-wider">
+                                    <i class="fa-solid fa-plus mr-1"></i> Guardar Lançamento
+                                </button>
+                                <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden px-4 bg-slate-800 hover:bg-slate-700 text-gray-300 font-semibold rounded-xl text-xs transition">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- GRÁFICO -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="glass-card p-6 rounded-3xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-purple-400"></i> Distribuição por Categoria
+                            </h3>
+                            <span class="text-[11px] text-gray-400">Visão Geral</span>
+                        </div>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- EXTRATO E HISTÓRICO -->
+            <div class="glass-card p-6 rounded-3xl space-y-5">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-cyan-400"></i> Extrato de Movimentações
+                        </h3>
+                        <p class="text-xs text-gray-400">Consulte, edite ou apague os seus registos</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="relative flex-1 sm:w-48">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-500"></i>
+                            <input type="text" id="search-input" onkeyup="render()" placeholder="Pesquisar..." 
+                                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl py-2 pl-9 pr-3 text-xs text-white focus:outline-none focus:border-cyan-400">
+                        </div>
+
+                        <select id="filter-type" onchange="render()" class="bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-cyan-400">
+                            <option value="all">Todos os Tipos</option>
+                            <option value="income">Apenas Entradas</option>
+                            <option value="expense">Apenas Saídas</option>
+                        </select>
+
+                        <select id="filter-category" onchange="render()" class="bg-slate-900 border border-slate-700/80 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-cyan-400">
+                            <option value="all">Todas as Categorias</option>
+                            <option value="Rendimento / Salário">Rendimento / Salário</option>
+                            <option value="Investimentos">Investimentos</option>
+                            <option value="Habitação / Contas">Habitação / Contas</option>
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Lazer / Pessoal">Lazer / Pessoal</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-slate-800/80">
+                                <th class="pb-3 px-3">Data</th>
+                                <th class="pb-3 px-3">Descrição</th>
+                                <th class="pb-3 px-3">Categoria</th>
+                                <th class="pb-3 px-3">Estado</th>
+                                <th class="pb-3 px-3 text-right">Valor</th>
+                                <th class="pb-3 px-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaction-rows" class="divide-y divide-slate-800/50 text-xs">
+                        </tbody>
+                    </table>
+
+                    <div id="empty-state" class="hidden py-12 text-center space-y-3">
+                        <div class="w-12 h-12 bg-slate-800/80 rounded-2xl flex items-center justify-center mx-auto text-gray-500">
+                            <i class="fa-solid fa-inbox text-xl"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-gray-400">Nenhum registo encontrado</p>
+                        <p class="text-xs text-gray-500">Adicione uma nova movimentação através do formulário.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- SCRIPT DE FUNCIONAMENTO -->
+    <script>
+        const DEFAULT_USER = { username: "cristiano.junior", pass: "123456", name: "Cristiano Júnior" };
+        
+        let transactions = JSON.parse(localStorage.getItem('nexus_transactions_v2')) || [
+            { id: 101, type: 'income', description: 'Rendimento / Salário', amount: 9500.00, date: '2026-03-01', category: 'Rendimento / Salário', status: 'pago' },
+            { id: 102, type: 'expense', description: 'Investimentos', amount: 2500.00, date: '2026-03-03', category: 'Investimentos', status: 'pago' },
+            { id: 103, type: 'expense', description: 'Supermercado e Despesas', amount: 1400.50, date: '2026-03-06', category: 'Alimentação', status: 'pago' }
+        ];
+
+        let savingsGoal = parseFloat(localStorage.getItem('nexus_goal')) || 50000;
+        let categoryChartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initClock();
+            checkSession();
+            document.getElementById('savings-goal-input').value = savingsGoal;
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            const err = document.getElementById('login-error');
+
+            if (u.toLowerCase() === DEFAULT_USER.username && p === DEFAULT_USER.pass) {
+                localStorage.setItem('nexus_logged', 'true');
+                err.classList.add('hidden');
+                showDashboard();
+            } else {
+                err.classList.remove('hidden');
+            }
+        }
+
+        function checkSession() {
+            if (localStorage.getItem('nexus_logged') === 'true') {
+                showDashboard();
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('dashboard').classList.add('hidden');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('nexus_logged');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('password-toggle-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            render();
+        }
+
+        function initClock() {
+            function update() {
+                const now = new Date();
+                document.getElementById('live-clock').innerText = now.toLocaleTimeString('pt-PT');
+                document.getElementById('live-date').innerText = now.toLocaleDateString('pt-PT', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+                
+                const hrs = now.getHours();
+                let g = "Bom dia";
+                if (hrs >= 12 && hrs < 18) g = "Boa tarde";
+                else if (hrs >= 18 || hrs < 5) g = "Boa noite";
+                document.getElementById('greeting-text').innerText = g;
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        function setType(t) {
+            document.getElementById('type').value = t;
+            const btnInc = document.getElementById('btn-type-income');
+            const btnExp = document.getElementById('btn-type-expense');
+
+            if (t === 'income') {
+                btnInc.className = "py-2.5 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition bg-emerald-500/20 border-emerald-500 text-emerald-400";
+                btnExp.className = "py-2.5 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition bg-slate-900 border-slate-800 text-gray-400 hover:border-slate-700";
+            } else {
+                btnExp.className = "py-2.5 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition bg-rose-500/20 border-rose-500 text-rose-400";
+                btnInc.className = "py-2.5 rounded-xl border font-bold text-xs flex items-center justify-center gap-2 transition bg-slate-900 border-slate-800 text-gray-400 hover:border-slate-700";
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-id').value;
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const date = document.getElementById('date').value;
+            const category = document.getElementById('category').value;
+            const status = document.getElementById('status').value;
+
+            if (!description || isNaN(amount) || amount <= 0 || !date) return;
+
+            if (editId) {
+                const index = transactions.findIndex(t => t.id === Number(editId));
+                if (index !== -1) {
+                    transactions[index] = { id: Number(editId), type, description, amount, date, category, status };
+                }
+            } else {
+                const newTransaction = {
+                    id: Date.now(),
+                    type,
+                    description,
+                    amount,
+                    date,
+                    category,
+                    status
+                };
+                transactions.unshift(newTransaction);
+            }
+
+            saveAndRefresh();
+            resetForm();
+        }
+
+        function deleteTransaction(id) {
+            const numId = Number(id);
+            if (confirm("Tem a certeza de que deseja apagar este registo?")) {
+                transactions = transactions.filter(item => item.id !== numId);
+                saveAndRefresh();
+            }
+        }
+
+        function editTransaction(id) {
+            const item = transactions.find(t => t.id === Number(id));
+            if (!item) return;
+
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('description').value = item.description;
+            document.getElementById('amount').value = item.amount;
+            document.getElementById('date').value = item.date;
+            document.getElementById('category').value = item.category;
+            document.getElementById('status').value = item.status;
+            setType(item.type);
+
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-400"></i> Editar Lançamento`;
+            document.getElementById('edit-badge').classList.remove('hidden');
+            document.getElementById('btn-submit').innerHTML = `<i class="fa-solid fa-check mr-1"></i> Atualizar Lançamento`;
+            document.getElementById('btn-cancel').classList.remove('hidden');
+            window.scrollTo({ top: 300, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            setType('income');
+
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-cyan-400"></i> Novo Lançamento`;
+            document.getElementById('edit-badge').classList.add('hidden');
+            document.getElementById('btn-submit').innerHTML = `<i class="fa-solid fa-plus mr-1"></i> Guardar Lançamento`;
+            document.getElementById('btn-cancel').classList.add('hidden');
+        }
+
+        function toggleStatus(id) {
+            const item = transactions.find(t => t.id === Number(id));
+            if (item) {
+                item.status = item.status === 'pago' ? 'pendente' : 'pago';
+                saveAndRefresh();
+            }
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('nexus_transactions_v2', JSON.stringify(transactions));
+            render();
+        }
+
+        function updateGoal() {
+            const val = parseFloat(document.getElementById('savings-goal-input').value);
+            if (!isNaN(val) && val > 0) {
+                savingsGoal = val;
+                localStorage.setItem('nexus_goal', savingsGoal);
+                render();
+            }
+        }
+
+        function resetAllData() {
+            if (confirm("Atenção: Deseja apagar TODOS os registos do sistema?")) {
+                transactions = [];
+                saveAndRefresh();
+            }
+        }
+
+        function render() {
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const filterType = document.getElementById('filter-type').value;
+            const filterCategory = document.getElementById('filter-category').value;
+
+            const filtered = transactions.filter(t => {
+                const matchSearch = t.description.toLowerCase().includes(searchText) || t.category.toLowerCase().includes(searchText);
+                const matchType = filterType === 'all' || t.type === filterType;
+                const matchCat = filterCategory === 'all' || t.category === filterCategory;
+                return matchSearch && matchType && matchCat;
+            });
+
+            let totalIncome = 0;
+            let totalExpense = 0;
+
+            transactions.forEach(t => {
+                if (t.type === 'income') totalIncome += Number(t.amount);
+                else totalExpense += Number(t.amount);
+            });
+
+            const balance = totalIncome - totalExpense;
+            const rate = totalIncome > 0 ? Math.max(0, ((balance / totalIncome) * 100)).toFixed(1) : 0;
+
+            document.getElementById('kpi-balance').innerText = `R$ ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpi-income').innerText = `R$ ${totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpi-expense').innerText = `R$ ${totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpi-rate').innerText = `${rate}%`;
+
+            document.getElementById('kpi-income-count').innerText = `${transactions.filter(t => t.type === 'income').length} entradas`;
+            document.getElementById('kpi-expense-count').innerText = `${transactions.filter(t => t.type === 'expense').length} saídas`;
+
+            // Meta progress
+            const goalPct = savingsGoal > 0 ? Math.min(100, Math.max(0, (balance / savingsGoal) * 100)).toFixed(1) : 0;
+            document.getElementById('goal-progress-bar').style.width = `${goalPct}%`;
+            document.getElementById('goal-current-text').innerText = `Atual: R$ ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('goal-percentage-text').innerText = `${goalPct}% concluído`;
+
+            // Render table rows
+            const tbody = document.getElementById('transaction-rows');
+            const emptyState = document.getElementById('empty-state');
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filtered.forEach(t => {
+                    const isInc = t.type === 'income';
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-800/40 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 px-3 text-gray-400 font-medium">${t.date.split('-').reverse().join('/')}</td>
+                        <td class="py-3 px-3 font-semibold text-white">${t.description}</td>
+                        <td class="py-3 px-3 text-gray-300"><span class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px]">${t.category}</span></td>
+                        <td class="py-3 px-3">
+                            <button onclick="toggleStatus(${t.id})" class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase transition ${t.status === 'pago' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20'}">
+                                ${t.status === 'pago' ? 'Pago' : 'Pendente'}
+                            </button>
+                        </td>
+                        <td class="py-3 px-3 text-right font-black ${isInc ? 'text-emerald-400' : 'text-rose-400'}">
+                            ${isInc ? '+' : '-'} R$ ${Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td class="py-3 px-3 text-center space-x-1">
+                            <button onclick="editTransaction(${t.id})" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 transition" title="Editar">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="deleteTransaction(${t.id})" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition" title="Apagar">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            renderChart();
+        }
+
+        function renderChart() {
+            const catTotals = {};
+            transactions.forEach(t => {
+                if (t.type === 'expense') {
+                    catTotals[t.category] = (catTotals[t.category] || 0) + Number(t.amount);
+                }
+            });
+
+            const labels = Object.keys(catTotals);
+            const data = Object.values(catTotals);
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            if (categoryChartInstance) {
+                categoryChartInstance.destroy();
+            }
+
+            if (labels.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                return;
+            }
+
+            categoryChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#00f2fe', '#7928CA', '#FF0080', '#10B981', '#F59E0B', '#3B82F6', '#EC4899', '#6366F1'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#9ca3af',
+                                font: { size: 10, family: 'Plus Jakarta Sans' },
+                                boxWidth: 12
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function exportToCSV() {
+            if (transactions.length === 0) {
+                alert("Não há dados para exportar.");
+                return;
+            }
+            let csv = "ID,Tipo,Descricao,Valor,Data,Categoria,Estado\n";
+            transactions.forEach(t => {
+                csv += `${t.id},${t.type},"${t.description}",${t.amount},${t.date},"${t.category}",${t.status}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'extrato_cristiano_junior.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
